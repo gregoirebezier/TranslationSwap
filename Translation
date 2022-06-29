@@ -1,0 +1,63 @@
+#!/usr/bin/python3
+from selenium import webdriver
+from time import sleep
+from selenium.webdriver.chrome.options import Options
+import warnings
+
+
+###---------REMOVE THE DEPRECATIONWARNING---------###
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
+def TranslateBack(driver, Sentence):
+    ButtonLangages = driver.find_elements_by_class_name("VfPpkd-Bz112c-RLmnJb")
+    ButtonLangages[2].click()
+    
+    Langages = driver.find_elements_by_xpath("//*[@class='qSb8Pe']")
+    for elem in Langages:
+        if elem.text == "Français":
+            elem.click()
+            break
+    sleep(2)
+    output = driver.find_element_by_class_name("Q4iAWc")
+    print("Before : ", Sentence, "\nAfter : ", output.text)
+
+def Translation(Sentence):
+    chrome_options = Options()
+    #chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--no-sandbox')
+    chrome_options.add_argument('--disable-dev-shm-usage')
+    driver = webdriver.Chrome(chrome_options=chrome_options)
+    driver.get("https://translate.google.com/?hl=fr")
+    driver.set_page_load_timeout(30)
+
+###---------MAXIMIZE WINDOW---------###
+    driver.maximize_window()
+    sleep(1)
+    input = driver.find_element_by_class_name("er8xn")
+    input.send_keys(Sentence)
+
+    temp = 133
+    sleep(1)
+    #index 133 a 263 (263 deniere langue (zoulou))
+    while (temp < 140):
+        try:
+            ButtonLangages = driver.find_elements_by_class_name("VfPpkd-Bz112c-RLmnJb")
+            ButtonLangages[2].click()
+            sleep(0.5)
+            Langages = driver.find_elements_by_xpath("//*[@class='qSb8Pe']")
+            Langages[temp].click()
+            sleep(1)
+            output = driver.find_element_by_class_name("Q4iAWc")
+            input = driver.find_element_by_class_name("er8xn")
+            input.clear()
+            input.send_keys(output.text)
+            sleep(1)
+        except:
+            pass
+        temp += 1
+    TranslateBack(driver, Sentence)
+    exit(0)
+
+def main():
+    Translation("J'aime beaucoup les patates et la soupes et j'ai envie d'un cookie")
+main()
